@@ -103,7 +103,6 @@ jobs:
           test_args: ["--", "--runInBand"]
           scripts: []  
 
-
   - name: Trivy FS (new)
     tasks:
       trivy:
@@ -137,7 +136,7 @@ jobs:
         output_dir: /tmp/crow/frontend/converted
         formats: [md]     # any subset: md | txt | html
         max_items: 100
-        include_pretty: true         # also writes *.pretty.json when input is JSON
+        include_pretty: true         # also writes *.pretty.json when is JSON
         title_prefix: "CI Report"            
   - name: Email Report (Model)
     tasks:
