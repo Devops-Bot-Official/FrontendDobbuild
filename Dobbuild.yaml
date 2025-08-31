@@ -1,0 +1,209 @@
+version: '1.0'
+mode: remote
+identifier: AzureCrowRunner
+category: Production
+username: crowuser
+environment:
+  # === Crowstore-backed values ===
+  CLONE_DIR:    { value: crowstore://clonedirfrontend }
+  SOURCE_URL:   { value: crowstore://frontendurl }
+  GIT_PROVIDER: { value: crowstore://gitprovider }
+  GIT_USERNAME: { value: crowstore://gitusername }
+  GIT_TOKEN:    { value: crowstore://fgittoken }
+  DOCKERFILE_PATH:    { value: crowstore://dockerfilefrontend}
+  DOCKER_USERNAME:    { value: crowstore://dockerusername }
+  DOCKER_PASSWORD:    { value: crowstore://dockerpassword }
+  GMAIL_PASSWORD:    { value: crowstore://gmailpassword }
+  IMAGE_NAME:    { value: crowstore://imageame }
+  # Either use a literal branch…
+  #B     { value: "main" }
+
+  # BRANCHES:   { value: crowstore://gitbranch }
+
+  # === Matching Crowstore tokens (CROWSTORE_TOKEN_<CREDNAME UPPERCASED>) ===
+  # These must match the *names after* crowstore:// exactly (uppercased, no extra underscores).
+  CROWSTORE_TOKEN_CLONEDIRFRONTEND:    { value: 0e4e5fec2cdd9c27d402ec31889a0237 }
+  CROWSTORE_TOKEN_FRONTENDURL:   { value: 8f167e766dd042d06ac1c54bed949eba }
+  CROWSTORE_TOKEN_GITPROVIDER: { value: fe251dd97eccb2ea55da1072ca09c4b8 }
+  CROWSTORE_TOKEN_GITUSERNAME: { value: c9e081c08366187bb1ab52a1185696f8 }
+  CROWSTORE_TOKEN_GITTOKEN:    { value: 06638103869c385bdb0850f4c248ca3b }
+  CROWSTORE_TOKEN_DOCKERFILEFRONTEND:    { value: b0288e28d314715e93260143ce2bdd9a }
+  CROWSTORE_TOKEN_DOCKERUSERNAME: { value: ce48835cd9a51357b79e039392ccea4c }
+  CROWSTORE_TOKEN_DOCKERPASSWORD: { value: e1d55acd7bdd5c53adf302e71b05baf9 }
+  CROWSTORE_TOKEN_GMAILPASSWORD:  { value: dac8e6153a018d7e37a99eacd37ed2b1 }
+  CROWSTORE_TOKEN_IMAGENAME: { value: dac8e6153a018d7e37a99eacd37ed2b1 }
+
+  # Only needed if you use crowstore://gitbranch above:
+  #CROWSTORE_TOKEN_GITBRANCH: { value: f4e9076b9dc189ad06dfc485fd731bf7 }
+jobs:
+- name: CROW FRONTEND
+  stages:
+  - name: Updating Azure Server
+    tasks:
+      shell:
+        enabled: true
+        shell: bash
+        steps:
+        - sudo apt-get update -y
+
+  # Install Git iff missing (your helper also attempts this; doing it here makes logs clearer)
+  - name: Install GIT Python(Debian)
+    tasks:
+      packages:
+        enabled: true
+        # Keep this list focused on universally-available kits to avoid repo conflicts
+        kits:
+          - python            # python3, pip, venv
+          - git-lfs
+        extra_os_packages:
+          - shellcheck        # linter that’s reliably in Ubuntu/Debian/Alpine repos
+  
+        update_cache: true
+        verbose: true
+        fail_fast: true
+        pm_timeout_s: 600
+        pm_retries: 3
+
+  # ======== Core: Checkout (invokes your Python helper under the hood) ========
+  - name: Git Checkout one
+    tasks:
+      checkout:
+        enabled: false
+        private_repo: true
+        # --- required / important fields your function expects ---
+        clone_dir: env=CLONE_DIR
+        source_url: env=SOURCE_URL
+        branches: 
+        - main
+        provider: env=GIT_PROVIDER
+        username: env=GIT_USERNAME
+        token: env=GIT_TOKEN
+
+  - name: Trivy FS (new)
+    tasks:
+      trivy:
+        enabled: false
+        debug: true                 # set true to enable --debug + verbose logs
+        working_directory: /tmp/frontend
+        cache_dir: /home/crowuser/.cache/trivy
+        format: json                 # table|json|sarif|cyclonedx|spdx-json
+        output_dir: /tmp/frontend/reports
+        timestamp_output: true
+        fail_fast: true
+        retries: 1
+        retry_delay: 3
+        timeout: "10m"
+        skip_update: false
+        severity: "CRITICAL,HIGH,MEDIUM"
+        ignore_unfixed: true
+        scanners: "vuln,secret,config"
+        list_all_pkgs: false
+        skip_dirs: [".git"]      
+        skip_files: []
+        targets:
+          - "fs ."         
+
+  - name: Convert Reports
+    tasks:
+      file_converter:
+        enabled: false
+        inputs:
+          - /tmp/frontend/reports/filesystem-.-20250829-062515.json
+        output_dir: /tmp/crow/converted
+        formats: [md]     # any subset: md | txt | html
+        max_items: 100
+        include_pretty: true         # also writes *.pretty.json when input is JSON
+        title_prefix: "CI Report"            
+  - name: Email Report (Model)
+    tasks:
+      email:
+        enabled: false
+        ensure_install: false
+        to: ["mohamed.sesay@outlook.com.au"]
+        subject: "Trivy Summary for Crow"
+        template_path: "/tmp/crow/converted/filesystem-.-20250829-062515-summary.md"
+        context:
+          name: "Prod Runner"
+        attachments:
+          - "/tmp/frontend/reports/filesystem-.-20250829-062515.json"
+          - "/tmp/crow/converted/filesystem-.-20250829-062515-summary.md"
+        track_open: true
+        report: true
+        priority: high
+        # schedule: "2025-07-01 09:00"   # (optional)
+        secret_source: env
+        smtp:
+          host: "smtp.gmail.com"
+          port: 587
+          username: "alhajibangs@gmail.com"
+          password: env=GMAIL_PASSWORD
+          from_email: "alhajibangs@gmail.com"
+          reply_to: "alhajibangs@gmail.com"
+          use_tls: true        
+
+  - name: Image Build Stage
+    tasks:
+      docker_build:
+        enabled: false
+        image_name: env=IMAGE_NAME
+        build_tag: V0.1.31
+        dockerfile_path: env=DOCKERFILE_PATH      
+
+  - name: Trivy Image (public)
+    tasks:
+      trivy:
+        enabled: false
+        format: json
+        output_dir: /tmp/frontend
+        targets:
+        - kind: image
+          target: devopsbot.azurecr.io/crow-cli:V0.1.31  
+
+  - name: Convert Image Reports
+    tasks:
+      file_converter:
+        enabled: false
+        inputs:
+          - /tmp/crow/image-devopsbot.azurecr.io_crow-cli_V0.1.31-20250829-072715.json
+        output_dir: /tmp/crow/converted
+        formats: [md]     # any subset: md | txt | html
+        max_items: 100
+        include_pretty: true         # also writes *.pretty.json when input is JSON
+        title_prefix: "CI Report"      
+
+  - name: Email Trivy image report
+    tasks:
+      email:
+        enabled: false
+        ensure_install: true
+        to: ["mohamed.sesay@outlook.com.au"]
+        subject: "Trivy image Summary for Crow"
+        template_path: "/tmp/crow/converted/image-devopsbot.azurecr.io_crow-cli_V0.1.31-20250829-072715-summary.md"
+        context:
+          name: "Prod Runner"
+        attachments:
+          - "/tmp/crow/image-devopsbot.azurecr.io_crow-cli_V0.1.31-20250829-072715.json"
+          - "/tmp/crow/converted/image-devopsbot.azurecr.io_crow-cli_V0.1.31-20250829-072715-summary.md"
+        track_open: true
+        report: true
+        priority: high
+        # schedule: "2025-07-01 09:00"   # (optional)
+        secret_source: env
+        smtp:
+          host: "smtp.gmail.com"
+          port: 587
+          username: "alhajibangs@gmail.com"
+          password: env=GMAIL_PASSWORD
+          from_email: "alhajibangs@gmail.com"
+          reply_to: "alhajibangs@gmail.com"
+          use_tls: true                        
+          
+  - name: docker push stage
+    tasks:
+      docker_push:
+        enabled: false
+        provider: azure
+        image_name: devopsbot.azurecr.io/crow-cli
+        image_tag: V0.1.31
+        username: env=DOCKER_USERNAME
+        password: env=DOCKER_PASSWORD       
