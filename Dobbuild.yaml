@@ -14,7 +14,7 @@ environment:
   DOCKER_USERNAME:    { value: crowstore://dockerusername }
   DOCKER_PASSWORD:    { value: crowstore://dockerpassword }
   GMAIL_PASSWORD:    { value: crowstore://gmailpassword }
-  IMAGE_NAME:    { value: crowstore://imageame }
+  IMAGE_NAME:    { value: crowstore://imagename }
   # Either use a literal branch…
   #BRANCH  2  { value: "main" }
 
