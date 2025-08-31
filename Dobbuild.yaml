@@ -277,9 +277,9 @@ jobs:
   - name: docker push stage
     tasks:
       docker_push:
-        enabled: false
+        enabled: true
         provider: azure
-        image_name: devopsbot.azurecr.io/crow-cli
-        image_tag: V0.1.31
+        image_name: env=IMAGE_NAME
+        image_tag: V.0.1.18
         username: env=DOCKER_USERNAME
         password: env=DOCKER_PASSWORD       
