@@ -79,6 +79,31 @@ jobs:
         username: env=GIT_USERNAME
         token: env=GIT_TOKEN
 
+  # ---------------------------------------------------------
+  # Scenario 1: Standard install → build → test
+  # Auto picks `npm ci` if package-lock.json exists, else `npm install`
+  # ---------------------------------------------------------
+  - name: NPM | Install, build
+    tasks:
+      npm:
+        enabled: true                     # optional (your orchestrator may check this)
+        working_directory: "/home/crowuser/frontend"
+        node_env: "production"            # exports NODE_ENV=production
+        omit_dev: true                    # add --omit=dev to install/ci
+        ignore_scripts: false             # don't skip lifecycle scripts during install
+        legacy_peer_deps: false
+        clean_node_modules: false         # set true to rm -rf node_modules before install
+        steps:
+          install: true
+          build: true
+          test: true
+          build_script: "build"           # npm run build
+          install_args: ["--no-audit", "--no-fund"]
+          build_args: []
+          test_args: ["--", "--runInBand"]
+          scripts: []  
+
+
   - name: Trivy FS (new)
     tasks:
       trivy:
