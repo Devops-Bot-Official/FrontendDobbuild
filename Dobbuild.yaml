@@ -98,30 +98,44 @@ jobs:
           - 'bash -lc "echo USER=$USER; which npm || true"'
           - 'sudo -E -H env PATH=/usr/local/bin:/usr/bin:$PATH bash -lc "echo SUDO_USER=$SUDO_USER; which npm || true"'
 
-  # ---------------------------------------------------------
-  # Scenario 1: Standard install → build → test
-  # Auto picks `npm ci` if package-lock.json exists, else `npm install`
-  # ---------------------------------------------------------
+
+  # 1) Install ALL deps (including dev) — no NODE_ENV here
+  - name: NPM | Install dev deps
+    tasks:
+      npm:
+        enabled: true
+        working_directory: "/home/crowuser/frontend"
+        # DO NOT set node_env here
+        clean_node_modules: true         # optional but recommended after Node upgrade
+        omit_dev: false                  # ensure dev deps are allowed
+        ignore_scripts: false
+        legacy_peer_deps: false
+        env:                              # force npm to include dev even if env is polluted
+          npm_config_production: "false"
+        steps:
+          install: true
+          build: false
+          test: false
+          install_args: ["--include=dev", "--no-audit", "--no-fund"]
+          build_args: []
+          test_args: []
+          scripts: []
+  
+  # 2) Build with production env (now vite is present locally)
   - name: NPM | Install, build
     tasks:
       npm:
-        enabled: true                     # optional (your orchestrator may check this)
+        enabled: true
         working_directory: "/home/crowuser/frontend"
-        node_env: "production"            # exports NODE_ENV=production
-        omit_dev: false                    # add --omit=dev to install/ci
-        ignore_scripts: false             # don't skip lifecycle scripts during install
-        legacy_peer_deps: false
-        clean_node_modules: false         # set true to rm -rf node_modules before install
+        node_env: "production"           # only for the build step
+        omit_dev: false                  # irrelevant here; we are not installing
         steps:
-          install: true
+          install: false
           build: true
           test: false
-          build_script: "build"           # npm run build new
-          install_args: []
+          build_script: "build"
           build_args: []
-          test_args: []
-          scripts: []  
-
+          scripts: []
   # ---------------------------------------------------------
   # Preflight: fix ownership + remove stale node_modules
   # ---------------------------------------------------------
