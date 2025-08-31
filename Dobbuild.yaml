@@ -116,7 +116,7 @@ jobs:
           install: true
           build: true
           test: false
-          build_script: "build"           # npm run build
+          build_script: "build"           # npm run build new
           install_args: []
           build_args: []
           test_args: []
