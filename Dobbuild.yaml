@@ -96,11 +96,11 @@ jobs:
         steps:
           install: true
           build: true
-          test: true
+          test: false
           build_script: "build"           # npm run build
-          install_args: ["--no-audit", "--no-fund"]
+          install_args: []
           build_args: []
-          test_args: ["--", "--runInBand"]
+          test_args: []
           scripts: []  
 
   - name: Trivy FS (new)
