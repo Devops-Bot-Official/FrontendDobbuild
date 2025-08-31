@@ -85,7 +85,7 @@ jobs:
   - name: NPM preflight | fix perms & clean node_modules
     tasks:
       shell:
-        enabled: true
+        enabled: false
         shell: bash
         steps:
           # Make sure project dir & npm cache are owned by the login user
