@@ -64,7 +64,7 @@ jobs:
         pm_timeout_s: 600
         pm_retries: 3
 
-  # ======== Core: Checkout (invokes your Python helper under the hood) ========
+  # ======== Core: Checkout (invokes your Python helper under the hood new) ========
   - name: Git Checkout one
     tasks:
       checkout:
