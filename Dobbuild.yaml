@@ -31,7 +31,7 @@ environment:
   CROWSTORE_TOKEN_DOCKERUSERNAME: { value: ce48835cd9a51357b79e039392ccea4c }
   CROWSTORE_TOKEN_DOCKERPASSWORD: { value: e1d55acd7bdd5c53adf302e71b05baf9 }
   CROWSTORE_TOKEN_GMAILPASSWORD:  { value: dac8e6153a018d7e37a99eacd37ed2b1 }
-  CROWSTORE_TOKEN_IMAGENAME: { value: dac8e6153a018d7e37a99eacd37ed2b1 }
+  CROWSTORE_TOKEN_IMAGENAME: { value: 02e6287b23cf37a3ff1b125473b1596f }
 
   # Only needed if you use crowstore://gitbranch above:
   #CROWSTORE_TOKEN_GITBRANCH: { value: f4e9076b9dc189ad06dfc485fd731bf7 }
@@ -69,7 +69,7 @@ jobs:
     tasks:
       checkout:
         enabled: false
-        private_repo: false
+        private_repo: true
         # --- required / important fields your function expects ---
         clone_dir: env=CLONE_DIR
         source_url: env=SOURCE_URL
@@ -117,7 +117,7 @@ jobs:
   - name: Email Report (Model)
     tasks:
       email:
-        enabled: true
+        enabled: false
         ensure_install: false
         to: ["mohamed.sesay@outlook.com.au"]
         subject: "Trivy Summary for Crow"
@@ -144,9 +144,9 @@ jobs:
   - name: Image Build Stage
     tasks:
       docker_build:
-        enabled: false
+        enabled: true
         image_name: env=IMAGE_NAME
-        build_tag: V0.1.31
+        build_tag: V.0.1.18
         dockerfile_path: env=DOCKERFILE_PATH      
 
   - name: Trivy Image (public)
