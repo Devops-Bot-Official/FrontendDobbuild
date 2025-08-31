@@ -89,7 +89,7 @@ jobs:
         enabled: true                     # optional (your orchestrator may check this)
         working_directory: "/home/crowuser/frontend"
         node_env: "production"            # exports NODE_ENV=production
-        omit_dev: true                    # add --omit=dev to install/ci
+        omit_dev: false                    # add --omit=dev to install/ci
         ignore_scripts: false             # don't skip lifecycle scripts during install
         legacy_peer_deps: false
         clean_node_modules: false         # set true to rm -rf node_modules before install
