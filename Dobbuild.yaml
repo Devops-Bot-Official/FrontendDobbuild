@@ -36,12 +36,12 @@ environment:
   # Only needed if you use crowstore://gitbranch above:
   #CROWSTORE_TOKEN_GITBRANCH: { value: f4e9076b9dc189ad06dfc485fd731bf7 }
 jobs:
-- name: CROW FRONTEND BUILD
+- name: Demo Anish
   stages:
   - name: Updating Azure Server
     tasks:
       shell:
-        enabled: false
+        enabled: true
         shell: bash
         steps:
         - sudo apt-get update -y
@@ -50,7 +50,7 @@ jobs:
   - name: Install GIT Python(Debian)
     tasks:
       packages:
-        enabled: false
+        enabled: true
         # Keep this list focused on universally-available kits to avoid repo conflicts
         kits:
           - python            # python3, pip, venv
@@ -85,7 +85,7 @@ jobs:
   - name: NPM preflight | fix perms & clean node_modules
     tasks:
       shell:
-        enabled: false
+        enabled: true
         shell: bash
         steps:
           # Make sure project dir & npm cache are owned by the login user
