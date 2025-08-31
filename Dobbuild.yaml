@@ -41,7 +41,7 @@ jobs:
   - name: Updating Azure Server
     tasks:
       shell:
-        enabled: true
+        enabled: false
         shell: bash
         steps:
         - sudo apt-get update -y
@@ -50,7 +50,7 @@ jobs:
   - name: Install GIT Python(Debian)
     tasks:
       packages:
-        enabled: true
+        enabled: false
         # Keep this list focused on universally-available kits to avoid repo conflicts
         kits:
           - python            # python3, pip, venv
@@ -69,7 +69,7 @@ jobs:
     tasks:
       checkout:
         enabled: true
-        private_repo: true
+        private_repo: false
         # --- required / important fields your function expects ---
         clone_dir: env=CLONE_DIR
         source_url: env=SOURCE_URL
@@ -108,8 +108,8 @@ jobs:
       file_converter:
         enabled: false
         inputs:
-          - /tmp/frontend/reports/filesystem-.-20250829-062515.json
-        output_dir: /tmp/crow/converted
+          - /tmp/frontend/reports/filesystem-.-20250831-063849.json
+        output_dir: /tmp/crow/frontend/converted
         formats: [md]     # any subset: md | txt | html
         max_items: 100
         include_pretty: true         # also writes *.pretty.json when input is JSON
