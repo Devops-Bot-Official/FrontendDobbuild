@@ -9,7 +9,7 @@ environment:
   SOURCE_URL:   { value: crowstore://frontendurl }
   GIT_PROVIDER: { value: crowstore://gitprovider }
   GIT_USERNAME: { value: crowstore://gitusername }
-  GIT_TOKEN:    { value: crowstore://fgittoken }
+  GIT_TOKEN:    { value: crowstore://gittoken }
   DOCKERFILE_PATH:    { value: crowstore://dockerfilefrontend}
   DOCKER_USERNAME:    { value: crowstore://dockerusername }
   DOCKER_PASSWORD:    { value: crowstore://dockerpassword }
