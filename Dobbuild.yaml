@@ -82,10 +82,10 @@ jobs:
   - name: Trivy FS (new)
     tasks:
       trivy:
-        enabled: false
+        enabled: true
         debug: true                 # set true to enable --debug + verbose logs
         working_directory: /tmp/frontend
-        cache_dir: /home/crowuser/.cache/trivy
+        cache_dir: /home/crowuser/frontend/.cache/trivy
         format: json                 # table|json|sarif|cyclonedx|spdx-json
         output_dir: /tmp/frontend/reports
         timestamp_output: true
