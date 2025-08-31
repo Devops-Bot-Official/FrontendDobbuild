@@ -97,7 +97,7 @@ jobs:
           # Optional: show npm path as user and via sudo (for diagnostics)
           - 'bash -lc "echo USER=$USER; which npm || true"'
           - 'sudo -E -H env PATH=/usr/local/bin:/usr/bin:$PATH bash -lc "echo SUDO_USER=$SUDO_USER; which npm || true"'
-  
+
   # ---------------------------------------------------------
   # Scenario 1: Standard install → build → test
   # Auto picks `npm ci` if package-lock.json exists, else `npm install`
@@ -128,7 +128,7 @@ jobs:
   - name: NPM preflight | fix perms & clean node_modules
     tasks:
       package_management:
-        enabled: true
+        enabled: false
         steps:
           - type: command
             name: "chown workspace and npm cache"
