@@ -16,7 +16,7 @@ environment:
   GMAIL_PASSWORD:    { value: crowstore://gmailpassword }
   IMAGE_NAME:    { value: crowstore://imageame }
   # Either use a literal branch…
-  #B     { value: "main" }
+  #BRANCH    { value: "main" }
 
   # BRANCHES:   { value: crowstore://gitbranch }
 
