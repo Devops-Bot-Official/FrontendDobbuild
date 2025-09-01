@@ -222,7 +222,7 @@ jobs:
       docker_build:
         enabled: true
         image_name: env=IMAGE_NAME
-        build_tag: V.0.1.22
+        build_tag: V.0.1.23
         dockerfile_path: env=DOCKERFILE_PATH      
 
   - name: Trivy Image (public)
@@ -280,6 +280,6 @@ jobs:
         enabled: true
         provider: azure
         image_name: env=IMAGE_NAME
-        image_tag: V.0.1.22
+        image_tag: V.0.1.23
         username: env=DOCKER_USERNAME
         password: env=DOCKER_PASSWORD       
