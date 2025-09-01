@@ -103,7 +103,7 @@ jobs:
   - name: NPM | Install dev deps
     tasks:
       npm:
-        enabled: false
+        enabled: true
         working_directory: "/home/crowuser/frontend"
         # DO NOT set node_env here
         clean_node_modules: true         # optional but recommended after Node upgrade
@@ -125,7 +125,7 @@ jobs:
   - name: NPM | Install, build
     tasks:
       npm:
-        enabled: false
+        enabled: true
         working_directory: "/home/crowuser/frontend"
         node_env: "production"           # only for the build step
         omit_dev: false                  # irrelevant here; we are not installing
@@ -220,9 +220,9 @@ jobs:
   - name: Image Build Stage
     tasks:
       docker_build:
-        enabled: false
+        enabled: true
         image_name: env=IMAGE_NAME
-        build_tag: V.0.1.20
+        build_tag: V.0.1.21
         dockerfile_path: env=DOCKERFILE_PATH      
 
   - name: Trivy Image (public)
@@ -280,6 +280,6 @@ jobs:
         enabled: true
         provider: azure
         image_name: env=IMAGE_NAME
-        image_tag: V.0.1.20
+        image_tag: V.0.1.21
         username: env=DOCKER_USERNAME
         password: env=DOCKER_PASSWORD       
