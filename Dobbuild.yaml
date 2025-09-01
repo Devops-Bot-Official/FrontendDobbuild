@@ -103,7 +103,7 @@ jobs:
   - name: NPM | Install dev deps
     tasks:
       npm:
-        enabled: false
+        enabled: true
         working_directory: "/home/crowuser/frontend"
         # DO NOT set node_env here
         clean_node_modules: true         # optional but recommended after Node upgrade
