@@ -263,7 +263,7 @@ jobs:
         track_open: true
         report: true
         priority: high
-        # schedule: "2025-07-01 09:00"   # (optional)
+        # schedule: "2025-07-01 09:00"   # (al)
         secret_source: env
         smtp:
           host: "smtp.gmail.com"
