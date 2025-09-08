@@ -5,105 +5,56 @@ category: Production
 username: crowuser
 environment:
   # === Crowstore-backed values ===
-  CLONE_DIR:    { value: crowstore://clonedirfrontend }
+  CLONE_DIR:    { value: crowstore://frontendclonedir }
   SOURCE_URL:   { value: crowstore://frontendurl }
-  GIT_PROVIDER: { value: crowstore://gitprovider }
-  GIT_USERNAME: { value: crowstore://gitusername }
   GIT_TOKEN:    { value: crowstore://gittoken }
-  DOCKERFILE_PATH:    { value: crowstore://dockerfilefrontend}
+  
   DOCKER_USERNAME:    { value: crowstore://dockerusername }
   DOCKER_PASSWORD:    { value: crowstore://dockerpassword }
-  GMAIL_PASSWORD:    { value: crowstore://gmailpassword }
+
   IMAGE_NAME:    { value: crowstore://imageame }
-  # Either use a literal branch…
-  #BRANCH  2  { value: "main" }
 
-  # BRANCHES:   { value: crowstore://gitbranch }
-
-  # === Matching Crowstore tokens (CROWSTORE_TOKEN_<CREDNAME UPPERCASED>) ===
   # These must match the *names after* crowstore:// exactly (uppercased, no extra underscores).
-  CROWSTORE_TOKEN_CLONEDIRFRONTEND:    { value: 0e4e5fec2cdd9c27d402ec31889a0237 }
-  CROWSTORE_TOKEN_FRONTENDURL:   { value: 8f167e766dd042d06ac1c54bed949eba }
-  CROWSTORE_TOKEN_GITPROVIDER: { value: fe251dd97eccb2ea55da1072ca09c4b8 }
-  CROWSTORE_TOKEN_GITUSERNAME: { value: c9e081c08366187bb1ab52a1185696f8 }
-  CROWSTORE_TOKEN_GITTOKEN:    { value: 06638103869c385bdb0850f4c248ca3b }
-  CROWSTORE_TOKEN_DOCKERFILEFRONTEND:    { value: b0288e28d314715e93260143ce2bdd9a }
-  CROWSTORE_TOKEN_DOCKERUSERNAME: { value: ce48835cd9a51357b79e039392ccea4c }
-  CROWSTORE_TOKEN_DOCKERPASSWORD: { value: e1d55acd7bdd5c53adf302e71b05baf9 }
-  CROWSTORE_TOKEN_GMAILPASSWORD:  { value: dac8e6153a018d7e37a99eacd37ed2b1 }
-  CROWSTORE_TOKEN_IMAGEAME: { value: 02e6287b23cf37a3ff1b125473b1596f }
+  CROWSTORE_TOKEN_FRONTENDCLONEDIR:    { value: 8f6e91b95f2a26b09ad1dfd2fbaf1dfd1 }
+  CROWSTORE_TOKEN_FRONTENDURL:   { value: c1b966b518f942abc727c91a26d40c51 }
 
-  # Only needed if you use crowstore://gitbranch above:
-  #CROWSTORE_TOKEN_GITBRANCH: { value: f4e9076b9dc189ad06dfc485fd731bf7 }
+  CROWSTORE_TOKEN_GITTOKEN:    { value: ee63e33b6b98a72756d732e115a5d256 }
+ 
+  CROWSTORE_TOKEN_DOCKERUSERNAME: { value: 96432ccb7604b08bc8e62fcdb593e192 }
+  CROWSTORE_TOKEN_DOCKERPASSWORD: { value: f4cdb4396653f858b2bc1a2897a354ac }
+  
+  CROWSTORE_TOKEN_IMAGEAME: { value: b76e56eb842600e44e69c2854d4f66d7 }
+
 jobs:
 - name: CROW FRONTEND BUILD
   stages:
   - name: Updating Azure Server
     tasks:
       shell:
-        enabled: false
+        enabled: true
         shell: bash
         steps:
         - sudo apt-get update -y
-
-  # Install Git iff missing (your helper also attempts this; doing it here makes logs clearer)
-  - name: Install GIT Python(Debian)
-    tasks:
-      packages:
-        enabled: false
-        # Keep this list focused on universally-available kits to avoid repo conflicts
-        kits:
-          - python            # python3, pip, venv
-          - git-lfs
-        extra_os_packages:
-          - shellcheck        # linter that’s reliably in Ubuntu/Debian/Alpine repos
-  
-        update_cache: true
-        verbose: true
-        fail_fast: true
-        pm_timeout_s: 600
-        pm_retries: 3
-
   # ======== Core: Checkout (invokes your Python helper under the hood new) ========
   - name: Git Checkout one
     tasks:
       checkout:
-        enabled: true
+        enabled: false
         private_repo: true
         # --- required / important fields your function expects ---
         clone_dir: env=CLONE_DIR
         source_url: env=SOURCE_URL
         branches: 
         - main
-        provider: env=GIT_PROVIDER
-        username: env=GIT_USERNAME
+        provider: github
+        username: Devops-Bot-Official
         token: env=GIT_TOKEN
-
-  # ---------------------------------------------------------
-  # 1) Preflight (permissions & cleanup) via SHELL
-  # ---------------------------------------------------------
-  - name: NPM preflight | fix perms & clean node_modules
-    tasks:
-      shell:
-        enabled: false
-        shell: bash
-        steps:
-          # Make sure project dir & npm cache are owned by the login user
-          - 'sudo chown -R crowuser:crowuser /home/crowuser/frontend /home/crowuser/.npm || true'
-          # Remove stale node_modules that may be root-owned
-          - 'sudo rm -rf /home/crowuser/frontend/node_modules || true'
-          # Ensure npm cache exists & is writable for the user
-          - 'sudo -u crowuser bash -lc "mkdir -p /home/crowuser/.npm && test -w /home/crowuser/.npm"'
-          # Optional: show npm path as user and via sudo (for diagnostics)
-          - 'bash -lc "echo USER=$USER; which npm || true"'
-          - 'sudo -E -H env PATH=/usr/local/bin:/usr/bin:$PATH bash -lc "echo SUDO_USER=$SUDO_USER; which npm || true"'
-
 
   # 1) Install ALL deps (including dev) — no NODE_ENV here
   - name: NPM | Install dev deps
     tasks:
       npm:
-        enabled: true
+        enabled: false
         working_directory: "/home/crowuser/frontend"
         # DO NOT set node_env here
         clean_node_modules: true         # optional but recommended after Node upgrade
@@ -125,7 +76,7 @@ jobs:
   - name: NPM | Install, build
     tasks:
       npm:
-        enabled: true
+        enabled: false
         working_directory: "/home/crowuser/frontend"
         node_env: "production"           # only for the build step
         omit_dev: false                  # irrelevant here; we are not installing
@@ -135,149 +86,21 @@ jobs:
           test: false
           build_script: "build"
           build_args: []
-          scripts: []
-  # ---------------------------------------------------------
-  # Preflight: fix ownership + remove stale node_modules
-  # ---------------------------------------------------------
-  - name: NPM preflight | fix perms & clean node_modules
-    tasks:
-      package_management:
-        enabled: false
-        steps:
-          - type: command
-            name: "chown workspace and npm cache"
-            become: true
-            sudo_flags: "-E -H"
-            commands:
-              - 'bash -lc "chown -R crowuser:crowuser /home/crowuser/frontend /home/crowuser/.npm || true"'
-              - 'bash -lc "rm -rf /home/crowuser/frontend/node_modules || true"'
-            validate:
-              - 'bash -lc "test -w /home/crowuser/frontend && echo ok"'
-              - 'bash -lc "test ! -e /home/crowuser/frontend/node_modules && echo ok"'
-  
-  - name: Trivy FS (new)
-    tasks:
-      trivy:
-        enabled: false
-        debug: true                 # set true to enable --debug + verbose logs
-        working_directory: /tmp/frontend
-        cache_dir: /home/crowuser/frontend/.cache/trivy
-        format: json                 # table|json|sarif|cyclonedx|spdx-json
-        output_dir: /tmp/frontend/reports
-        timestamp_output: true
-        fail_fast: true
-        retries: 1
-        retry_delay: 3
-        timeout: "10m"
-        skip_update: false
-        severity: "CRITICAL,HIGH,MEDIUM"
-        ignore_unfixed: true
-        scanners: "vuln,secret,config"
-        list_all_pkgs: false
-        skip_dirs: [".git"]      
-        skip_files: []
-        targets:
-          - "fs ."         
-
-  - name: Convert Reports
-    tasks:
-      file_converter:
-        enabled: false
-        inputs:
-          - /tmp/frontend/reports/filesystem-.-20250831-063849.json
-        output_dir: /tmp/crow/frontend/converted
-        formats: [md]     # any subset: md | txt | html
-        max_items: 100
-        include_pretty: true         # also writes *.pretty.json when is JSON
-        title_prefix: "CI Report"            
-  - name: Email Report (Model)
-    tasks:
-      email:
-        enabled: false
-        ensure_install: false
-        to: ["mohamed.sesay@outlook.com.au"]
-        subject: "Trivy Summary for Crow"
-        template_path: "/tmp/crow/frontend/converted/filesystem-.-20250831-063849-summary.md"
-        context:
-          name: "Prod Runner"
-        attachments:
-          - "/tmp/frontend/reports/filesystem-.-20250831-063849.json"
-          - "/tmp/crow/frontend/converted/filesystem-.-20250831-063849-summary.md"
-        track_open: true
-        report: true
-        priority: high
-        # schedule: "2025-07-01 09:00"   # (optional)
-        secret_source: env
-        smtp:
-          host: "smtp.gmail.com"
-          port: 587
-          username: "alhajibangs@gmail.com"
-          password: env=GMAIL_PASSWORD
-          from_email: "alhajibangs@gmail.com"
-          reply_to: "alhajibangs@gmail.com"
-          use_tls: true        
-
+          scripts: []           
+            
   - name: Image Build Stage
     tasks:
       docker_build:
-        enabled: true
+        enabled: false
         image_name: env=IMAGE_NAME
         build_tag: V.0.1.41
-        dockerfile_path: env=DOCKERFILE_PATH      
-
-  - name: Trivy Image (public)
-    tasks:
-      trivy:
-        enabled: false
-        format: json
-        output_dir: /tmp/frontend
-        targets:
-        - kind: image
-          target: devopsbot.azurecr.io/crow-cli:V0.1.31  
-
-  - name: Convert Image Reports
-    tasks:
-      file_converter:
-        enabled: false
-        inputs:
-          - /tmp/crow/image-devopsbot.azurecr.io_crow-cli_V0.1.31-20250829-072715.json
-        output_dir: /tmp/crow/converted
-        formats: [md]     # any subset: md | txt | html
-        max_items: 100
-        include_pretty: true         # also writes *.pretty.json when input is JSON
-        title_prefix: "CI Report"      
-
-  - name: Email Trivy image report
-    tasks:
-      email:
-        enabled: false
-        ensure_install: true
-        to: ["mohamed.sesay@outlook.com.au"]
-        subject: "Trivy image Summary for Crow"
-        template_path: "/tmp/crow/converted/image-devopsbot.azurecr.io_crow-cli_V0.1.31-20250829-072715-summary.md"
-        context:
-          name: "Prod Runner"
-        attachments:
-          - "/tmp/crow/image-devopsbot.azurecr.io_crow-cli_V0.1.31-20250829-072715.json"
-          - "/tmp/crow/converted/image-devopsbot.azurecr.io_crow-cli_V0.1.31-20250829-072715-summary.md"
-        track_open: true
-        report: true
-        priority: high
-        # schedule: "2025-07-01 09:00"   # (al)
-        secret_source: env
-        smtp:
-          host: "smtp.gmail.com"
-          port: 587
-          username: "alhajibangs@gmail.com"
-          password: env=GMAIL_PASSWORD
-          from_email: "alhajibangs@gmail.com"
-          reply_to: "alhajibangs@gmail.com"
-          use_tls: true                        
+        dockerfile_path: /home/crowuser/frontend/Dockerfile     
+                         
           
   - name: docker push stage
     tasks:
       docker_push:
-        enabled: true
+        enabled: false
         provider: azure
         image_name: env=IMAGE_NAME
         image_tag: V.0.1.41
