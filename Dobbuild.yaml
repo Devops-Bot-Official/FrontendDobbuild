@@ -42,7 +42,7 @@ jobs:
         enabled: true
         private_repo: true
         # --- required / important fields your function expects ---
-        clone_dir: env=CLONE_DIR
+        clone_dir: /home/crowuser/frontend
         source_url: env=SOURCE_URL
         branches: 
         - main
