@@ -31,7 +31,7 @@ jobs:
   - name: Updating Azure Server
     tasks:
       shell:
-        enabled: true
+        enabled: false
         shell: bash
         steps:
         - sudo apt-get update -y
@@ -39,7 +39,7 @@ jobs:
   - name: Git Checkout one
     tasks:
       checkout:
-        enabled: false
+        enabled: true
         private_repo: true
         # --- required / important fields your function expects ---
         clone_dir: env=CLONE_DIR
