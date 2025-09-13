@@ -79,7 +79,7 @@ jobs:
         enabled: true
         working_directory: "/home/crowuser/frontend"
         node_env: "production"           # only for the build step
-        omit_dev: false                  # irrelevant here; we are not installing
+        omit_dev: false                  # irrelevant here; we are not instal
         steps:
           install: false
           build: true
