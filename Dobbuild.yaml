@@ -61,7 +61,7 @@ jobs:
         omit_dev: false                  # ensure dev deps are allowed
         ignore_scripts: false
         legacy_peer_deps: false
-        env:                              # force npm to include dev even if env is polluted
+        env:                              # force npm to include dev even if env is
           npm_config_production: "false"
         steps:
           install: true
