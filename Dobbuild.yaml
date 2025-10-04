@@ -76,7 +76,7 @@ jobs:
       npm:
         enabled: true
         working_directory: "/home/crowuser/portal"
-        node_env: "production"           # only for the build step
+        node_env: "production"           # only for the build step new
         omit_dev: false                  # irrelevant here; we are not instal
         steps:
           install: false
